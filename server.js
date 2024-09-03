@@ -37,6 +37,8 @@ app.get('/', (req, res) => {
 // Handle schedule updates
 app.post('/schedule', (req, res) => {
     const { day, onTime, offTime } = req.body;
+    console.log({ day, onTime, offTime } )
+
     db.run(`INSERT OR REPLACE INTO schedule (day, on_time, off_time) VALUES (?, ?, ?)`, [day, onTime, offTime], function(err) {
         if (err) {
             console.error(err.message);
@@ -48,6 +50,7 @@ app.post('/schedule', (req, res) => {
 
 // Get the current schedule as JSON
 app.get('/schedule', (req, res) => {
+
     db.all(`SELECT * FROM schedule`, [], (err, rows) => {
         if (err) {
             console.error(err.message);
@@ -66,6 +69,8 @@ function checkSchedule() {
     const now = new Date();
     const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
     const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
+
+    console.log("checking schedule")
 
     db.get(`SELECT * FROM schedule WHERE day = ?`, [currentDay], (err, row) => {
         if (err) {
