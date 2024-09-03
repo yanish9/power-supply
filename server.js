@@ -31,6 +31,18 @@ db.serialize(() => {
 
 // Serve the main HTML page with current schedule data
 app.get('/', (req, res) => {
+    db.all(`SELECT * FROM schedule`, [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        const schedule = {};
+        rows.forEach(row => {
+            schedule[row.day] = { on: row.on_time, off: row.off_time };
+        });
+
+        console.log(rows)
+    });
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
@@ -66,6 +78,7 @@ app.get('/schedule', (req, res) => {
 
 // Check and control the relay based on the schedule
 function checkSchedule() {
+
     const now = new Date();
     const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
     const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
