@@ -40,8 +40,7 @@ app.get('/', (req, res) => {
         rows.forEach(row => {
             schedule[row.day] = { on: row.on_time, off: row.off_time };
         });
-
-        console.log(rows)
+        res.json(schedule);
     });
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
