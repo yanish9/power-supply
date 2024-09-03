@@ -10,8 +10,8 @@ const port = 3000;
 const db = new sqlite3.Database('schedule.db');
 
 // Set up the relay pin (GPIO pin 17 for this example)
-const relay = new Gpio(17, 'out');
-
+const relay = new Gpio(131, 'out');
+ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static('public'));
@@ -23,7 +23,7 @@ db.serialize(() => {
         on_time TEXT,
         off_time TEXT
     )`);
-    const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+   
     daysOfWeek.forEach(day => {
         db.run(`INSERT OR IGNORE INTO schedule (day) VALUES (?)`, [day]);
     });
