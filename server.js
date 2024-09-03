@@ -78,6 +78,7 @@ function checkSchedule() {
             return;
         }
         if (row) {
+            console.log(row)
             const { on_time, off_time } = row;
             if (currentTime === on_time) {
                 relay.writeSync(1); // Turn relay ON
