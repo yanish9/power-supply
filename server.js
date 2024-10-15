@@ -65,14 +65,20 @@ app.post('/schedule', (req, res) => {
 
 app.post('/relay/activate', (req, res) => {
     const { day, onTime, offTime } = req.body;
+
+    console.log("active")
     relay.writeSync(0);
     relay2.writeSync(0);
+    res.json({success: 1})
 });
 
 app.post('/relay/deactivate', (req, res) => {
     const { day, onTime, offTime } = req.body;
+    console.log("deactivate")
     relay.writeSync(0);
     relay2.writeSync(0);
+    res.json({success: 1})
+
 });
 
 
