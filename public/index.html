@@ -227,6 +227,7 @@
 
         // Function to render the schedule list
         function renderSchedule(data) {
+            console.log(data)
             scheduleList.innerHTML = '';
             for (const [day, times] of Object.entries(data)) {
                 const item = document.createElement('li');

@@ -12,8 +12,8 @@ const db = new sqlite3.Database('schedule.db');
 var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
-const relay = new Gpio(72, 'out');
-const relay2 = new Gpio(69, 'out');
+// const relay = new Gpio(72, 'out');
+// const relay2 = new Gpio(69, 'out');
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ];
 // Middleware
 app.use(bodyParser.json());
@@ -83,6 +83,13 @@ app.post('/relay/deactivate', (req, res) => {
 
 });
 
+app.get('/relay/status', (req, res) => { 
+    console.log("Status")
+     
+    res.json({success: 1, is:manualActive});
+
+});
+
 
 // Get the current schedule as JSON
 app.get('/schedule', (req, res) => {
@@ -101,12 +108,14 @@ app.get('/schedule', (req, res) => {
 });
 
 // Check and control the relay based on the schedule
+ 
+
 function checkSchedule() {
 
     if (manualActive){
         return;
     }
-    
+
     const now = new Date();
     const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
     const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
@@ -122,12 +131,12 @@ function checkSchedule() {
         if (row) {
             console.log(row)
             const { on_time, off_time } = row;
-            if (currentTime === on_time) {
-             	relay.writeSync(1);
-             	relay2.writeSync(1); // Turn relay ON
-            } else if (currentTime === off_time) {
-                relay.writeSync(0);
-		relay2.writeSync(0); // Turn relay OFF
+            if (on_time <= currentTime && currentTime < off_time) {
+                relay.writeSync(1); // Turn relay ON
+                relay2.writeSync(1);
+            } else {
+                relay.writeSync(0); // Turn relay OFF
+                relay2.writeSync(0);
             }
         }
     });
