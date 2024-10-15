@@ -9,7 +9,7 @@ const app = express();
 const port = 3000;
 const db = new sqlite3.Database('schedule.db');
 
-var manualActive = 0;
+var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
 const relay = new Gpio(72, 'out');
@@ -69,6 +69,7 @@ app.post('/relay/activate', (req, res) => {
     console.log("active")
     relay.writeSync(1);
     relay2.writeSync(1);
+    manualActive = true;
     res.json({success: 1})
 });
 
@@ -77,6 +78,7 @@ app.post('/relay/deactivate', (req, res) => {
     console.log("deactivate")
     relay.writeSync(0);
     relay2.writeSync(0);
+    manualActive = false;
     res.json({success: 1})
 
 });
@@ -101,16 +103,17 @@ app.get('/schedule', (req, res) => {
 // Check and control the relay based on the schedule
 function checkSchedule() {
 
+    if (manualActive){
+        return;
+    }
+    
     const now = new Date();
     const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
     const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
 
     console.log("checking schedule")
 
-    if (manualActive){
-        return;
-    }
-
+   
     db.get(`SELECT * FROM schedule WHERE day = ?`, [currentDay], (err, row) => {
         if (err) {
             console.error(err.message);
