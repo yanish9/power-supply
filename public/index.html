@@ -256,10 +256,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.success ? 'Relay toggled successfully!' : 'Failed to toggle relay.');
+                console.log(data.success ? 'Relay toggled successfully!' : 'Failed to toggle relay.');
             })
             .catch(error => {
-                alert('Error toggling relay.');
+                
                 console.error('Error:', error);
             });
         }

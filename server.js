@@ -67,8 +67,8 @@ app.post('/relay/activate', (req, res) => {
     const { day, onTime, offTime } = req.body;
 
     console.log("active")
-    relay.writeSync(0);
-    relay2.writeSync(0);
+    relay.writeSync(1);
+    relay2.writeSync(1);
     res.json({success: 1})
 });
 
