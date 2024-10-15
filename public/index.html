@@ -18,11 +18,22 @@
             margin: 0 auto;
             padding: 20px;
         }
+
+        .logo-container { 
+            display: flex;
+            align-items: center;
+            align-items: center;
+            background: #82adcb;
+            background-position: top;
+            width: 100%;
+        }
+
         .logo {
             margin: 20px auto;
             width: 150px;
-            height: 150px;
-            background-image: url('data:image/png;base64,your_base64_string_here');
+            height: 45px;
+           
+            background-image: url('/img/itarget.png');
             background-size: contain;
             background-repeat: no-repeat;
         }
@@ -37,6 +48,13 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .day-schedule:hover {
+            transform: translateY(-2px);
         }
         .day-schedule h3 {
             margin-bottom: 15px;
@@ -56,19 +74,53 @@
             border-radius: 4px;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        button {
-            font-size: 1rem;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        .switch-container {
+            margin: 30px 0;
+        }
+        .switch-label {
+            font-size: 1.5rem;
+            color: #444;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 120px;
+            height: 60px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
         }
-        button:hover {
-            background-color: #45a049;
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 50px;
+            width: 50px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
         }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(45px);
+        }
+
         h2 {
             margin-top: 40px;
             font-size: 2rem;
@@ -86,22 +138,58 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .day-schedule {
+                padding: 15px;
+            }
+            .day-schedule h3 {
+                font-size: 1.5rem;
+            }
+            li {
+                font-size: 1rem;
+            }
+            .switch {
+                width: 90px;
+                height: 45px;
+            }
+            .slider:before {
+                height: 40px;
+                width: 40px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logo-container">
         <div class="logo"></div>
+    </div>
         <h1>Relay Scheduler</h1>
+                <!-- Switch button -->
+                <div class="switch-container">
+                    <span class="switch-label">Manual Switch:</span><br>
+                    <label class="switch">
+                        <input type="checkbox" id="relaySwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
         <div id="scheduleForm"></div>
         <h2>Current Schedule</h2>
         <ul id="scheduleList"></ul>
+
+
     </div>
 
     <script src="./socket.io.js"></script>
     <script>
         const scheduleForm = document.getElementById('scheduleForm');
         const scheduleList = document.getElementById('scheduleList');
-
+        const relaySwitch = document.getElementById('relaySwitch');
         const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
         // Render the form for each day
@@ -110,8 +198,10 @@
             div.className = 'day-schedule';
             div.innerHTML = `
                 <h3>${day}</h3>
-                <label>ON Time: </label><input type="time" id="${day.toLowerCase()}_on">
-                <label>OFF Time: </label><input type="time" id="${day.toLowerCase()}_off">
+                <label>ON Time: </label>
+                <input type="time" id="${day.toLowerCase()}_on">
+                <label>OFF Time: </label>
+                <input type="time" id="${day.toLowerCase()}_off">
                 <button onclick="setSchedule('${day}')">Set Schedule</button>
             `;
             scheduleForm.appendChild(div);
@@ -125,23 +215,15 @@
             const offTime = document.getElementById(`${day.toLowerCase()}_off`).value;
             fetch('/schedule', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ day, onTime, offTime })
             }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    alert('Schedule set successfully!');
-                } else {
-                    alert('Failed to set schedule.');
-                }
+                alert(data.success ? 'Schedule set successfully!' : 'Failed to set schedule.');
             });
         }
 
         // Update the schedule list in real-time
-        socket.on('scheduleUpdate', data => {
-            renderSchedule(data);
-        });
+        socket.on('scheduleUpdate', renderSchedule);
 
         // Function to render the schedule list
         function renderSchedule(data) {
@@ -156,7 +238,31 @@
         // Fetch the initial schedule
         fetch('/schedule')
             .then(response => response.json())
-            .then(data => renderSchedule(data));
+            .then(renderSchedule);
+
+        // Toggle switch functionality for the relay
+        relaySwitch.addEventListener('change', function() {
+            const activate = relaySwitch.checked;
+            sendRelayRequest(activate); // Send "activate relay" request
+        });
+
+        // Function to send the "activate relay" request
+        function sendRelayRequest(activate) {
+            const status = activate ? 'activate' : 'deactivate';
+            fetch(`/relay/${status}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ relayStatus: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.success ? 'Relay toggled successfully!' : 'Failed to toggle relay.');
+            })
+            .catch(error => {
+                alert('Error toggling relay.');
+                console.error('Error:', error);
+            });
+        }
     </script>
 </body>
 </html>

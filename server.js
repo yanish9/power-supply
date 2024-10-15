@@ -10,7 +10,8 @@ const port = 3000;
 const db = new sqlite3.Database('schedule.db');
 
 // Set up the relay pin (GPIO pin 17 for this example)
-const relay = new Gpio(354, 'out');
+// const relay = new Gpio(354, 'out');
+const relay = 0
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ];
 // Middleware
 app.use(bodyParser.json());
