@@ -22,10 +22,11 @@ app.use(express.static('public'));
 // Initialize the database
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS schedule (
-        day TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        day TEXT UNIQUE,
         on_time TEXT,
         off_time TEXT
-    )`);
+    );`);
    
     daysOfWeek.forEach(day => {
         db.run(`INSERT OR IGNORE INTO schedule (day) VALUES (?)`, [day]);
