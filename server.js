@@ -95,7 +95,7 @@ app.get('/relay/status', (req, res) => {
 // Get the current schedule as JSON
 app.get('/schedule', (req, res) => {
 
-    db.all(`SELECT * FROM schedule`, [], (err, rows) => {
+    db.all(`SELECT * FROM schedule ORDER BY id; `, [], (err, rows) => {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ error: err.message });
