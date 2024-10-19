@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relay Scheduler</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -163,6 +165,7 @@
             }
         }
     </style>
+    
 </head>
 <body>
     <div class="container">
@@ -181,10 +184,24 @@
         <div id="scheduleForm"></div>
         <h2>Current Schedule</h2>
         <ul id="scheduleList"></ul>
+        <table id="scheduleTable" class="display">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>ON Time</th>
+                    <th>OFF Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Schedule data will be inserted here by renderSchedule -->
+            </tbody>
+        </table>
 
 
     </div>
-
+ 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="./socket.io.js"></script>
     <script>
         const scheduleForm = document.getElementById('scheduleForm');
@@ -226,7 +243,7 @@
         socket.on('scheduleUpdate', renderSchedule);
 
         // Function to render the schedule list
-        function renderSchedule(data) {
+        function renderSchedule1122(data) {
             console.log(data)
             scheduleList.innerHTML = '';
             for (const [day, times] of Object.entries(data)) {
@@ -236,6 +253,31 @@
             }
         }
 
+// Function to render the schedule in a DataTable
+function renderSchedule(data) {
+    const scheduleTableBody = document.querySelector('#scheduleTable tbody');
+    scheduleTableBody.innerHTML = ''; // Clear existing table rows
+
+    for (const [day, times] of Object.entries(data)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${day}</td>
+            <td>${times.on || 'Not set'}</td>
+            <td>${times.off || 'Not set'}</td>
+        `;
+        scheduleTableBody.appendChild(row);
+    }
+
+    // Initialize or reinitialize DataTables
+    $('#scheduleTable').DataTable({
+        destroy: true, // Destroy any existing table before reinitializing
+        paging: false, // Disable paging if you don't want pagination
+        searching: false,
+        info: false, // Disable search if you don't need it
+    });
+}
+
+ 
         // Fetch the initial schedule
         fetch('/schedule')
             .then(response => response.json())
