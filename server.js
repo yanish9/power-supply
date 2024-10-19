@@ -28,8 +28,8 @@ db.serialize(() => {
         off_time TEXT
     );`);
    
-    daysOfWeek.forEach(day, index => {
-        db.run(`INSERT OR IGNORE INTO schedule (index, day) VALUES (?)`, [id, day]);
+    daysOfWeek.forEach((day, index) => {
+        db.run(`INSERT OR IGNORE INTO schedule (id, day) VALUES (?)`, [index, day]);
     });
 
 });
