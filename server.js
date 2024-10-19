@@ -31,6 +31,16 @@ db.serialize(() => {
     daysOfWeek.forEach((day, index) => {
         db.run(`INSERT OR IGNORE INTO schedule (id, day) VALUES (?,?)`, [index, day]);
     });
+
+    db.all(`SELECT * FROM schedule`, [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        console.log(rows)
+    })
+
 });
 
 // Serve the main HTML page with current schedule data
