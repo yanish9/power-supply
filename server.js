@@ -14,7 +14,7 @@ var manualActive = false;
 // Set up the relay pin (GPIO pin 17 for this example)
 // const relay = new Gpio(72, 'out');
 // const relay2 = new Gpio(69, 'out');
- const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ];
+ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" , "Sunday"];
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static('public'));
@@ -22,14 +22,14 @@ app.use(express.static('public'));
 // Initialize the database
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS schedule (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY ,
         day TEXT UNIQUE,
         on_time TEXT,
         off_time TEXT
     );`);
    
-    daysOfWeek.forEach(day => {
-        db.run(`INSERT OR IGNORE INTO schedule (day) VALUES (?)`, [day]);
+    daysOfWeek.forEach(day, index => {
+        db.run(`INSERT OR IGNORE INTO schedule (index, day) VALUES (?)`, [id, day]);
     });
 });
 
