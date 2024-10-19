@@ -29,7 +29,7 @@ db.serialize(() => {
     );`);
    
     daysOfWeek.forEach((day, index) => {
-        db.run(`INSERT OR IGNORE INTO schedule (id, day) VALUES (?)`, [index, day]);
+        db.run(`INSERT OR IGNORE INTO schedule (id, day) VALUES (?,?)`, [index, day]);
     });
 });
 
