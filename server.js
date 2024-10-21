@@ -12,8 +12,8 @@ const db = new sqlite3.Database('schedule.db');
 var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
- const relay = new Gpio(72, 'out');
- const relay2 = new Gpio(69, 'out');
+//  const relay = new Gpio(72, 'out');
+//  const relay2 = new Gpio(69, 'out');
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 // Middleware
 app.use(bodyParser.json());
@@ -140,14 +140,18 @@ function checkSchedule() {
             return;
         }
         if (row) {
-            console.log(row)
+            console.log("row -", row)
             const { on_time, off_time } = row;
+            console.log({ on_time, off_time })
+
             if (on_time <= currentTime && currentTime < off_time) {
-                relay.writeSync(1); // Turn relay ON
-                relay2.writeSync(1);
+                console.log("ON");
+              //  relay.writeSync(1); // Turn relay ON
+              //  relay2.writeSync(1);
             } else {
-                relay.writeSync(0); // Turn relay OFF
-                relay2.writeSync(0);
+                console.log("OFF");
+              //  relay.writeSync(0); // Turn relay OFF
+              //  relay2.writeSync(0);
             }
         }
     });
