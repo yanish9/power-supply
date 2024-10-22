@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relay Scheduler</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+    <link rel="stylesheet" href="./css/boot.css" />
 
     <style>
         body {
@@ -15,13 +17,19 @@
             padding: 0;
             text-align: center;
         }
+
+        body .container {
+            padding-top: 100px;
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        .logo-container { 
+        .logo-container {
+            position: fixed;
             display: flex;
             align-items: center;
             align-items: center;
@@ -34,40 +42,57 @@
             margin: 20px auto;
             width: 150px;
             height: 45px;
-           
+            background-size: cover;
             background-image: url('/img/itarget.png');
             background-size: contain;
             background-repeat: no-repeat;
         }
+
         h1 {
             margin-bottom: 20px;
             font-size: 2.5rem;
             color: #444;
         }
+
         .day-schedule {
             margin-bottom: 25px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            padding: 10px;
             transition: transform 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
+        .times-container {
+            display: flex;
+        }
+
+        .day-schedule .times {
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .day-schedule:hover {
             transform: translateY(-2px);
         }
+
         .day-schedule h3 {
             margin-bottom: 15px;
             font-size: 1.75rem;
             color: #555;
         }
+
         label {
             font-size: 1rem;
             margin-right: 10px;
             color: #666;
         }
+
         input[type="time"] {
             font-size: 1rem;
             padding: 5px;
@@ -76,24 +101,30 @@
             border-radius: 4px;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .switch-container {
             margin: 30px 0;
         }
+
         .switch-label {
             font-size: 1.5rem;
             color: #444;
         }
+
         .switch {
-            position: relative;
+            position: fixed;
             display: inline-block;
+            right: 1%;
             width: 120px;
             height: 60px;
         }
+
         .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
+
         .slider {
             position: absolute;
             cursor: pointer;
@@ -105,6 +136,7 @@
             transition: 0.4s;
             border-radius: 34px;
         }
+
         .slider:before {
             position: absolute;
             content: "";
@@ -116,10 +148,12 @@
             transition: 0.4s;
             border-radius: 50%;
         }
-        input:checked + .slider {
+
+        input:checked+.slider {
             background-color: #4CAF50;
         }
-        input:checked + .slider:before {
+
+        input:checked+.slider:before {
             transform: translateX(60px);
         }
 
@@ -128,10 +162,12 @@
             font-size: 2rem;
             color: #444;
         }
+
         ul {
             list-style-type: none;
             padding: 0;
         }
+
         li {
             font-size: 1.25rem;
             margin: 10px 0;
@@ -140,8 +176,15 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         th {
-            text-align: center!important; /* Center-aligns the text in the table headers */
+            text-align: center !important;
+            /* Center-aligns the text in the table headers */
+        }
+
+        #scheduleForm {
+            overflow: auto;
+            height: 450px;
         }
 
         /* Responsive styles */
@@ -149,63 +192,86 @@
             h1 {
                 font-size: 2rem;
             }
+
             .day-schedule {
                 padding: 15px;
             }
+
             .day-schedule h3 {
                 font-size: 1.5rem;
             }
+
             li {
                 font-size: 1rem;
             }
+
             .switch {
                 width: 90px;
                 height: 45px;
             }
+
             .slider:before {
                 height: 40px;
                 width: 40px;
             }
+
+
         }
     </style>
-    
+
 </head>
+
 <body>
-    <div class="container">
-        <div class="logo-container">
+    <div class="logo-container">
         <div class="logo"></div>
+        <div class="switch">
+            <!-- <span class="switch-label">Manual Switch:</span><br> -->
+            <label class="switch">
+                <input type="checkbox" id="relaySwitch">
+                <span class="slider round"></span>
+            </label>
+        </div>
     </div>
-        <h1>Relay Scheduler</h1>
-                <!-- Switch button -->
-                <div class="switch-container">
-                    <span class="switch-label">Manual Switch:</span><br>
-                    <label class="switch">
-                        <input type="checkbox" id="relaySwitch">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-        <div id="scheduleForm"></div>
-        <h2>Current Schedule</h2>
-        <ul id="scheduleList"></ul>
-        <table id="scheduleTable" class="display">
-            <thead>
-                <tr>
-                    <th>Day</th>
-                    <th>ON Time</th>
-                    <th>OFF Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Schedule data will be inserted here by renderSchedule -->
-            </tbody>
-        </table>
+    <div class="container">
+
+        <!-- <hr> -->
+        <!-- <h1>Relay Scheduler</h1> -->
+
+        <div class="row align-items-center">
+
+            <!-- Schedule Form -->
+            <div class="col-md-6">
+                <div id="scheduleForm"></div>
+            </div>
+
+            <div class="col-md-6">
+
+                <h2>Current Schedule</h2>
+                <ul id="scheduleList"></ul>
+
+                <table id="scheduleTable" class="display table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>ON Time</th>
+                            <th>OFF Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Schedule data will be inserted here by renderSchedule -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
 
-    </div>
- 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <script src="./socket.io.js"></script>
+    <script src="./js/socket.io.js"></script>
+    <script src="./js/boot.js"></script>
     <script>
         const scheduleForm = document.getElementById('scheduleForm');
         const scheduleList = document.getElementById('scheduleList');
@@ -218,16 +284,27 @@
             div.className = 'day-schedule';
             div.innerHTML = `
                 <h3>${day}</h3>
+                <div class="times-container">
+                <div class="times">
+
                 <label>ON Time: </label>
                 <input type="time" id="${day.toLowerCase()}_on">
+
+                </div>
+                <div class="times">
+
                 <label>OFF Time: </label>
                 <input type="time" id="${day.toLowerCase()}_off">
-                <button onclick="setSchedule('${day}')">Set Schedule</button>
+                </div>
+                </div>
+
+                <button class="btn btn-primary m-2" onclick="setSchedule('${day}')">Set Schedule</button>
+
             `;
             scheduleForm.appendChild(div);
         });
 
-        const socket = io();
+        const socket = io('http://localhost:3000');
 
         // Function to set the schedule
         function setSchedule(day) {
@@ -242,53 +319,54 @@
             });
         }
 
-        // Update the schedule list in real-time
-        socket.on('scheduleUpdate', renderSchedule);
 
         // Function to render the schedule list
-        function renderSchedule1122(data) {
-            console.log(data)
-            scheduleList.innerHTML = '';
+
+
+        // Function to render the schedule in a DataTable
+        function renderSchedule(data) {
+            const scheduleTableBody = document.querySelector('#scheduleTable tbody');
+            scheduleTableBody.innerHTML = ''; // Clear existing table rows
+
             for (const [day, times] of Object.entries(data)) {
-                const item = document.createElement('li');
-                item.textContent = `${day}: ON at ${times.on || 'Not set'}, OFF at ${times.off || 'Not set'}`;
-                scheduleList.appendChild(item);
-            }
-        }
-
-// Function to render the schedule in a DataTable
-function renderSchedule(data) {
-    const scheduleTableBody = document.querySelector('#scheduleTable tbody');
-    scheduleTableBody.innerHTML = ''; // Clear existing table rows
-
-    for (const [day, times] of Object.entries(data)) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+                const row = document.createElement('tr');
+                row.innerHTML = `
             <td>${day}</td>
             <td>${times.on || 'Not set'}</td>
             <td>${times.off || 'Not set'}</td>
         `;
-        scheduleTableBody.appendChild(row);
-    }
+                scheduleTableBody.appendChild(row);
+            }
+        }
 
-    // Initialize or reinitialize DataTables
-    $('#scheduleTable').DataTable({
-        destroy: true, // Destroy any existing table before reinitializing
-        paging: false, // Disable paging if you don't want pagination
-        searching: false,
-        "ordering": false,
-        info: false, // Disable search if you don't need it
-    });
-}
+        // Initialize or reinitialize DataTables
+        $('#scheduleTable').DataTable({
+            destroy: true, // Destroy any existing table before reinitializing
+            paging: false, // Disable paging if you don't want pagination
+            searching: false,
+            "ordering": false,
+            info: false, // Disable search if you don't need it
+        });
 
- 
-        // Fetch the initial schedule
         fetch('/schedule')
             .then(response => response.json())
             .then(renderSchedule);
 
+
+        socket.on('connect', () => {
+            console.log('Successfully connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+        // Update the schedule list in real-time
+        socket.on('scheduleUpdate', renderSchedule);
+
+        // Fetch the initial schedule
+
         // Toggle switch functionality for the relay
-        relaySwitch.addEventListener('change', function() {
+        relaySwitch.addEventListener('change', function () {
             const activate = relaySwitch.checked;
             sendRelayRequest(activate); // Send "activate relay" request
         });
@@ -301,15 +379,16 @@ function renderSchedule(data) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ relayStatus: status })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.success ? 'Relay toggled successfully!' : 'Failed to toggle relay.');
-            })
-            .catch(error => {
-                
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.success ? 'Relay toggled successfully!' : 'Failed to toggle relay.');
+                })
+                .catch(error => {
+
+                    console.error('Error:', error);
+                });
         }
     </script>
 </body>
+
 </html>

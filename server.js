@@ -5,10 +5,15 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const Gpio = require('onoff').Gpio; // Import the onoff library
 
+const http = require('http');
+const socketIo = require('socket.io'); 
+
+
 const app = express();
 const port = 3000;
 const db = new sqlite3.Database('schedule.db');
-
+const server = http.createServer(app);
+const io = socketIo(server);
 var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
@@ -69,6 +74,17 @@ app.post('/schedule', (req, res) => {
             console.error(err.message);
             return res.json({ success: false });
         }
+                db.all(`SELECT * FROM schedule`, [], (err, rows) => {
+            if (err) {
+                console.error(err.message);
+                return;
+            }
+            const schedule = {};
+            rows.forEach(row => {
+                schedule[row.day] = { on: row.on_time, off: row.off_time };
+            });
+            io.emit('scheduleUpdate', schedule); // Emit the update to all clients
+        });
         res.json({ success: true });
     });
 });
@@ -110,10 +126,12 @@ app.get('/schedule', (req, res) => {
             console.error(err.message);
             return res.status(500).json({ error: err.message });
         }
+        
         const schedule = {};
         rows.forEach(row => {
             schedule[row.day] = { on: row.on_time, off: row.off_time };
         });
+         io.emit('scheduleUpdate', schedule);
         res.json(schedule);
     });
 });
@@ -160,7 +178,16 @@ function checkSchedule() {
 // Check the schedule every minute
 setInterval(checkSchedule, 25000);
 
+
+io.on('connection', (socket) => {
+    console.log('New client connected');
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });
+
