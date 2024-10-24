@@ -17,8 +17,10 @@ const io = socketIo(server);
 var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
-//  const relay = new Gpio(72, 'out');
-//  const relay2 = new Gpio(69, 'out');
+//   const relay = new Gpio(72, 'out');
+//   const relay2 = new Gpio(69, 'out');
+//   const relay3 = new Gpio(70, 'out');
+
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 // Middleware
 app.use(bodyParser.json());
@@ -94,8 +96,9 @@ app.post('/relay/activate', (req, res) => {
     const { day, onTime, offTime } = req.body;
 
     console.log("active")
-    relay.writeSync(1);
-    relay2.writeSync(1);
+    // relay.writeSync(1);
+    // relay2.writeSync(1);
+    // relay3.writeSync(1);
     manualActive = true;
     res.json({success: 1})
 });
@@ -103,8 +106,10 @@ app.post('/relay/activate', (req, res) => {
 app.post('/relay/deactivate', (req, res) => {
     const { day, onTime, offTime } = req.body;
     console.log("deactivate")
-    relay.writeSync(0);
-    relay2.writeSync(0);
+    // relay.writeSync(0);
+    // relay2.writeSync(0);
+    // relay3.writeSync(0);
+
     manualActive = false;
     res.json({success: 1})
 
@@ -113,7 +118,15 @@ app.post('/relay/deactivate', (req, res) => {
 app.get('/relay/status', (req, res) => { 
     console.log("Status")
      
-    res.json({success: 1, is:manualActive});
+    if (manualActive){
+        res.json({success: 1, is:manualActive});
+
+    } 
+
+    else {
+        res.json({success: 0, is:manualActive});
+        
+    }
 
 });
 
@@ -164,12 +177,16 @@ function checkSchedule() {
 
             if (on_time <= currentTime && currentTime < off_time) {
                 console.log("ON");
-              //  relay.writeSync(1); // Turn relay ON
-              //  relay2.writeSync(1);
+                 relay.writeSync(1); // Turn relay ON
+                 relay2.writeSync(1);
+                 relay3.writeSync(1);
+                 
             } else {
                 console.log("OFF");
-              //  relay.writeSync(0); // Turn relay OFF
-              //  relay2.writeSync(0);
+                 relay.writeSync(0); // Turn relay OFF
+                 relay2.writeSync(0);
+                 relay3.writeSync(0);
+
             }
         }
     });
