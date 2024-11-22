@@ -17,8 +17,8 @@ const io = socketIo(server);
 var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
-//   const relay = new Gpio(72, 'out');
-//   const relay2 = new Gpio(69, 'out');
+  // const relay = new Gpio(72, 'out');
+  // const relay2 = new Gpio(69, 'out');
 //   const relay3 = new Gpio(70, 'out');
 
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -96,8 +96,8 @@ app.post('/relay/activate', (req, res) => {
     const { day, onTime, offTime } = req.body;
 
     console.log("active")
-    // relay.writeSync(1);
-    // relay2.writeSync(1);
+     relay.writeSync(1);
+     relay2.writeSync(1);
     // relay3.writeSync(1);
     manualActive = true;
     res.json({success: 1})
@@ -106,8 +106,8 @@ app.post('/relay/activate', (req, res) => {
 app.post('/relay/deactivate', (req, res) => {
     const { day, onTime, offTime } = req.body;
     console.log("deactivate")
-    // relay.writeSync(0);
-    // relay2.writeSync(0);
+     relay.writeSync(0);
+     relay2.writeSync(0);
     // relay3.writeSync(0);
 
     manualActive = false;
@@ -179,13 +179,13 @@ function checkSchedule() {
                 console.log("ON");
                  relay.writeSync(1); // Turn relay ON
                  relay2.writeSync(1);
-                 relay3.writeSync(1);
+                 //relay3.writeSync(1);
                  
             } else {
                 console.log("OFF");
                  relay.writeSync(0); // Turn relay OFF
                  relay2.writeSync(0);
-                 relay3.writeSync(0);
+                 //relay3.writeSync(0);
 
             }
         }
