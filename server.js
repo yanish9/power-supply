@@ -17,8 +17,8 @@ const io = socketIo(server);
 var manualActive = false;
 
 // Set up the relay pin (GPIO pin 17 for this example)
-  // const relay = new Gpio(72, 'out');
-  // const relay2 = new Gpio(69, 'out');
+   const relay = new Gpio(72, 'out');
+   const relay2 = new Gpio(69, 'out');
 //   const relay3 = new Gpio(70, 'out');
 
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -29,14 +29,14 @@ app.use(express.static('public'));
 // Initialize the database
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS schedule (
-        id INTEGER PRIMARY KEY ,
-        day TEXT UNIQUE,
+       
+        day TEXT PRIMARY KEY,
         on_time TEXT,
         off_time TEXT
     );`);
    
     daysOfWeek.forEach((day, index) => {
-        db.run(`INSERT OR IGNORE INTO schedule (id, day) VALUES (?,?)`, [index, day]);
+        db.run(`INSERT OR IGNORE INTO schedule ( day) VALUES (?)`, [day]);
     });
 
     db.all(`SELECT * FROM schedule`, [], (err, rows) => {
@@ -45,7 +45,7 @@ db.serialize(() => {
             return res.status(500).json({ error: err.message });
         }
 
-        console.log(rows)
+      //  console.log(rows)
     })
 
 });
@@ -69,7 +69,7 @@ app.get('/', (req, res) => {
 // Handle schedule updates
 app.post('/schedule', (req, res) => {
     const { day, onTime, offTime } = req.body;
-    console.log({ day, onTime, offTime } )
+    //console.log({ day, onTime, offTime } )
 
     db.run(`INSERT OR REPLACE INTO schedule (day, on_time, off_time) VALUES (?, ?, ?)`, [day, onTime, offTime], function(err) {
         if (err) {
@@ -78,7 +78,7 @@ app.post('/schedule', (req, res) => {
         }
                 db.all(`SELECT * FROM schedule`, [], (err, rows) => {
             if (err) {
-                console.error(err.message);
+//                console.error(err.message);
                 return;
             }
             const schedule = {};
@@ -95,7 +95,7 @@ app.post('/schedule', (req, res) => {
 app.post('/relay/activate', (req, res) => {
     const { day, onTime, offTime } = req.body;
 
-    console.log("active")
+  //  console.log("active")
      relay.writeSync(1);
      relay2.writeSync(1);
     // relay3.writeSync(1);
@@ -105,7 +105,7 @@ app.post('/relay/activate', (req, res) => {
 
 app.post('/relay/deactivate', (req, res) => {
     const { day, onTime, offTime } = req.body;
-    console.log("deactivate")
+    //console.log("deactivate")
      relay.writeSync(0);
      relay2.writeSync(0);
     // relay3.writeSync(0);
@@ -116,7 +116,7 @@ app.post('/relay/deactivate', (req, res) => {
 });
 
 app.get('/relay/status', (req, res) => { 
-    console.log("Status")
+   // console.log("Status")
      
     if (manualActive){
         res.json({success: 1, is:manualActive});
@@ -134,7 +134,7 @@ app.get('/relay/status', (req, res) => {
 // Get the current schedule as JSON
 app.get('/schedule', (req, res) => {
 
-    db.all(`SELECT * FROM schedule ORDER BY id; `, [], (err, rows) => {
+    db.all(`SELECT * FROM schedule; `, [], (err, rows) => {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ error: err.message });
@@ -149,6 +149,25 @@ app.get('/schedule', (req, res) => {
     });
 });
 
+
+app.get('/factory-reset', (req, res) => {
+
+    db.all(`DELETE FROM schedule; `, [], (err) => {
+        if (err) {
+     //       console.error(err.message);
+            return res.status(500).json({ error: err.message });
+        }
+  daysOfWeek.forEach((day, index) => {
+       db.run(`INSERT OR IGNORE INTO schedule ( day) VALUES (?)`, [day]); 
+
+});
+
+res.json({success:1});
+
+ })
+
+})
+
 // Check and control the relay based on the schedule
  
 
@@ -162,7 +181,7 @@ function checkSchedule() {
     const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
     const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
 
-    console.log("checking schedule")
+   // console.log("checking schedule")
 
    
     db.get(`SELECT * FROM schedule WHERE day = ?`, [currentDay], (err, row) => {
@@ -171,9 +190,9 @@ function checkSchedule() {
             return;
         }
         if (row) {
-            console.log("row -", row)
+       //     console.log("row -", row)
             const { on_time, off_time } = row;
-            console.log({ on_time, off_time })
+     //       console.log({ on_time, off_time })
 
             if (on_time <= currentTime && currentTime < off_time) {
                 console.log("ON");
@@ -197,7 +216,7 @@ setInterval(checkSchedule, 25000);
 
 
 io.on('connection', (socket) => {
-    console.log('New client connected');
+   // console.log('New client connected');
     
     socket.on('disconnect', () => {
         console.log('Client disconnected');

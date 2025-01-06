@@ -224,6 +224,8 @@
 
 <body>
     <div class="logo-container">
+      <button id="factory-reset-btn" class="btn btn-danger m-2" onClick="factoryReset()">Factory Reset</button>
+	<button id="reload-btn" class="btn btn-primary m-2 ml-2" onClick="reloadPage()">&#x21bb;</button>
         <div class="logo"></div>
         <div class="switch">
             <!-- <span class="switch-label">Manual Switch:</span><br> -->
@@ -315,6 +317,7 @@
                 body: JSON.stringify({ day, onTime, offTime })
             }).then(response => response.json()).then(data => {
                 alert(data.success ? 'Schedule set successfully!' : 'Failed to set schedule.');
+		location.reload()
             });
         }
 
@@ -343,7 +346,7 @@
             destroy: true, // Destroy any existing table before reinitializing
             paging: false, // Disable paging if you don't want pagination
             searching: false,
-            "ordering": false,
+            "ordering": true,
             info: false, // Disable search if you don't need it
         });
 
@@ -413,6 +416,24 @@
 
 
         }
+
+ function reloadPage(){
+ location.reload();
+}
+
+
+function factoryReset() {
+    if (confirm("This will delete all current schedules. Do you want to proceed?")) {
+        fetch('/factory-reset')
+	.then(reloadPage);
+    }
+}
+
+
+
+
+setInterval(fetchStatus, 30000);
+
     </script>
 </body>
 
