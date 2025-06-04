@@ -19,7 +19,7 @@ var manualActive = false;
 // Set up the relay pin (GPIO pin 17 for this example)
    const relay = new Gpio(72, 'out');
    const relay2 = new Gpio(69, 'out');
-//   const relay3 = new Gpio(70, 'out');
+  const relay3 = new Gpio(70, 'out');
 
  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 // Middleware
@@ -169,47 +169,93 @@ res.json({success:1});
 })
 
 // Check and control the relay based on the schedule
- 
 
 function checkSchedule() {
-
-    if (manualActive){
-        return;
-    }
+    if (manualActive) return;
 
     const now = new Date();
-    const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
-    const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
+    const currentDay = daysOfWeek[now.getDay()];
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM
 
-   // console.log("checking schedule")
-
-   
     db.get(`SELECT * FROM schedule WHERE day = ?`, [currentDay], (err, row) => {
         if (err) {
             console.error(err.message);
             return;
         }
         if (row) {
-       //     console.log("row -", row)
             const { on_time, off_time } = row;
-     //       console.log({ on_time, off_time })
 
-            if (on_time <= currentTime && currentTime < off_time) {
+            // Compare as numbers (HHMM) for correct time math
+            const on = parseInt(on_time.replace(":", ""));
+            const off = parseInt(off_time.replace(":", ""));
+            const curr = parseInt(currentTime.replace(":", ""));
+
+            let isOn = false;
+
+            if (on < off) {
+                // e.g. 07:00 to 22:00 (same day)
+                isOn = curr >= on && curr < off;
+            } else if (on > off) {
+                // e.g. 19:00 to 01:00 (overnight)
+                isOn = curr >= on || curr < off;
+            } else {
+                // on == off → assume always off
+                isOn = false;
+            }
+
+            if (isOn) {
                 console.log("ON");
-                 relay.writeSync(1); // Turn relay ON
-                 relay2.writeSync(1);
-                 //relay3.writeSync(1);
-                 
+                relay.writeSync(1);
+                relay2.writeSync(1);
             } else {
                 console.log("OFF");
-                 relay.writeSync(0); // Turn relay OFF
-                 relay2.writeSync(0);
-                 //relay3.writeSync(0);
-
+                relay.writeSync(0);
+                relay2.writeSync(0);
             }
         }
     });
 }
+
+
+// function checkSchedule() {
+
+//     if (manualActive){
+//         return;
+//     }
+
+//     const now = new Date();
+//     const currentDay = daysOfWeek[now.getDay()]; // 0 = Sunday, 1 = Monday, etc.
+//     const currentTime = now.toTimeString().slice(0, 5); // Get HH:MM
+
+//    // console.log("checking schedule")
+
+   
+//     db.get(`SELECT * FROM schedule WHERE day = ?`, [currentDay], (err, row) => {
+//         if (err) {
+//             console.error(err.message);
+//             return;
+//         }
+//         if (row) {
+//        //     console.log("row -", row)
+//             const { on_time, off_time } = row;
+//      //       console.log({ on_time, off_time })
+
+//             if (on_time <= currentTime && currentTime < off_time) {
+//                 console.log("ON");
+//                  relay.writeSync(1); // Turn relay ON
+//                  relay2.writeSync(1);
+//                  //relay3.writeSync(1);
+                 
+//             } else {
+//                 console.log("OFF");
+//                  relay.writeSync(0); // Turn relay OFF
+//                  relay2.writeSync(0);
+//                  //relay3.writeSync(0);
+
+//             }
+//         }
+//     });
+// }
 
 // Check the schedule every minute
 setInterval(checkSchedule, 25000);

@@ -7,8 +7,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yanish9/power-supply.git"
+  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yanish9/power-supply/issues"
+  },
+  "homepage": "https://github.com/yanish9/power-supply#readme",
   "dependencies": {
     "body-parser": "^1.20.3",
     "express": "^4.21.1",
